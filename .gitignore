@@ -11,7 +11,7 @@ __pycache__/
 DEMO.md
 .env
 domain_config.suggested.env
-
+系统设计说明.md
 data/raw/*
 !data/raw/.gitkeep
 data/processed/*
