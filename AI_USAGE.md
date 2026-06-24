@@ -46,3 +46,9 @@
 - Bug 发现与修复：6 处（min_score 默认值、query intent 误分类、embedding 默认模型、`generation_provider` 误导、`answer_min_score` 死字段、`None` chunk_id 计数）
 - 重构：移除 Mock OCR Provider（~100 行代码 + 相关测试）
 - 测试：55 个测试用例，覆盖所有核心模块
+## Codex 使用记录
+
+- **OpenAI Codex**：作为后续代码检测和发布前检查助手，参与仓库状态检查、版本控制清理、测试执行、样本评估验证和推送前风险排查。
+- 本轮 Codex 执行并确认：`pytest` 55 项通过、`compileall` 通过、`scripts/validate_index.py` 通过、`scripts/eval.py --case-set financial-sample` 6/6 通过，并完成一次 `scripts/ask.py` 问答烟测。
+- 本轮 Codex 发现并处理的提交前问题包括：将 `.idea/` 加入 `.gitignore`，删除误生成的 `1.8.0` 文件，确认 `.env`、缓存目录、原始数据和处理产物不会被误提交。
+- Codex 输出仍需人工最终确认，尤其是是否公开提交样本 PDF、运行截图，以及绑定哪个 GitHub 远程仓库。

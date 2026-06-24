@@ -8,7 +8,7 @@ __pycache__/
 .claude/
 .agents/
 .idea/
-
+DEMO.md
 .env
 domain_config.suggested.env
 
