@@ -1,0 +1,51 @@
+from pathlib import Path
+
+
+def test_expected_project_files_exist() -> None:
+    root = Path(__file__).resolve().parents[1]
+    expected_files = [
+        "README.md",
+        "DESIGN.md",
+        "TESTING.md",
+        "AI_USAGE.md",
+        "requirements.txt",
+        "requirements-dense.txt",
+        ".env.example",
+        "scripts/ingest.py",
+        "scripts/ask.py",
+        "scripts/eval.py",
+        "scripts/suggest_domain_config.py",
+        "pyproject.toml",
+        "src/docqa/agent/prompt_builder.py",
+        "src/docqa/agent/qa_agent.py",
+        "src/docqa/agent/query_analyzer.py",
+        "src/docqa/agent/self_check.py",
+        "src/docqa/config.py",
+        "src/docqa/config_suggestion.py",
+        "src/docqa/evaluation/cases.py",
+        "src/docqa/evaluation/runner.py",
+        "src/docqa/pdf/detector.py",
+        "src/docqa/pdf/renderer.py",
+        "src/docqa/ocr/base.py",
+        "src/docqa/ocr/factory.py",
+        "src/docqa/ocr/paddle_ocr.py",
+        "src/docqa/ocr/tesseract_ocr.py",
+        "src/docqa/parsing/base.py",
+        "src/docqa/parsing/chunker.py",
+        "src/docqa/parsing/clause_extractor.py",
+        "src/docqa/parsing/factory.py",
+        "src/docqa/parsing/local_parser.py",
+        "src/docqa/parsing/mineru_normalizer.py",
+        "src/docqa/parsing/mineru_parser.py",
+        "src/docqa/parsing/normalizer.py",
+        "src/docqa/parsing/schema.py",
+        "src/docqa/parsing/table_extractor.py",
+        "src/docqa/retrieval/bm25.py",
+        "src/docqa/retrieval/dense.py",
+        "src/docqa/retrieval/hybrid.py",
+        "src/docqa/retrieval/store.py",
+        "src/docqa/retrieval/tokenizer.py",
+    ]
+
+    missing = [path for path in expected_files if not (root / path).exists()]
+    assert missing == []
