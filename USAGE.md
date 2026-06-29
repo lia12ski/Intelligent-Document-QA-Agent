@@ -4,10 +4,17 @@
 
 ## 1. 环境准备
 
-在 Windows PowerShell 中进入项目根目录：
+先 clone 仓库并进入项目根目录：
 
-```powershell
-cd "C:\Users\exten\Documents\New project"
+```bash
+git clone <repository-url>
+cd Intelligent-Document-QA-Agent
+```
+
+如果已经 clone 到本地，直接进入项目目录：
+
+```bash
+cd <project-dir>
 ```
 
 如果仓库中已经有 `.venv`，直接使用它：
@@ -41,7 +48,13 @@ Streamlit Demo 检测到 `MINERU_API_KEY` 后，会在页面左侧默认选择 `
 
 ## 2. 启动前端页面
 
-在项目根目录执行：
+跨平台通用启动方式：
+
+```bash
+python -m streamlit run app.py
+```
+
+Windows 虚拟环境启动方式：
 
 ```powershell
 .venv\Scripts\python.exe -m streamlit run app.py
@@ -60,6 +73,12 @@ http://localhost:8501
 ```
 
 如果 8501 端口被占用，可以换一个端口：
+
+```bash
+python -m streamlit run app.py --server.port 8502
+```
+
+Windows 虚拟环境示例：
 
 ```powershell
 .venv\Scripts\python.exe -m streamlit run app.py --server.port 8502
@@ -99,7 +118,19 @@ http://localhost:8502
 
 默认情况下，前端 Demo 的 `执行目标关键词校验（仅财报样本/回归评估需要）` 是关闭的。这样上传合同、简历、报告或其他 PDF 时，不会被财报样本关键词拦截。
 
-## 4. 推荐演示问题
+## 4. 3 分钟面试演示脚本
+
+1. 开场说明：这是一个面向真实业务 PDF 的 AI Native 文档问答 Agent MVP，不只是 CLI RAG 脚本。
+2. 上传 PDF：在 `PDF 上传` 中选择扫描版或业务样本文档，说明上传文件只保存在本地 `data/raw/streamlit_uploads/`，不会提交到仓库。
+3. 文档检测：点击 `Detect PDF`，展示 `PDF type`、页数、文本页数、扫描页数和推荐解析策略。
+4. 解析建索引：点击 `Parse & Build Index`，展示 `page_count`、`chunk_count`、`table_count`、`parser` 和 `strategy`。
+5. 正常问答：输入一个能从文档中找到依据的问题，展示 `Answer` 和 `Sources`。
+6. 证据追溯：展开 sources，指出每条证据都有 `page`、`chunk_id`、`snippet` 和检索来源。
+7. 自检机制：展示 `self_check.grounded` 和 `risk_flags`，说明低置信度或证据不足会 warning。
+8. 拒答案例：输入一个文档外问题，例如 `这个标准是否规定了国外认证流程？`，展示系统拒答或风险提示。
+9. 收尾说明：CLI 用于自动化评估，Streamlit 用于高保真交互原型和面试演示。
+
+## 5. 推荐演示问题
 
 如果使用当前财报样本文档，可以尝试：
 
@@ -125,7 +156,7 @@ decoder出现了几次？
 
 这些问题分别用于展示正文检索、表格数值问答、模糊问题处理、无证据拒答和全局词频计数。
 
-## 5. 页面字段怎么看
+## 6. 页面字段怎么看
 
 - `Answer`：最终回答。回答应来自检索到的文档证据。
 - `Sources`：回答依据，包含页码、chunk_id、检索分数和证据片段。
@@ -134,7 +165,7 @@ decoder出现了几次？
 - `query_analysis.intent`：系统判断问题属于表格、数值、定义或开放问题。
 - `query_analysis.rewritten_query`：系统为了容错或聚焦检索而改写后的问题。
 
-## 6. CLI 使用方式
+## 7. CLI 使用方式
 
 除了前端页面，也可以用命令行跑完整流程。
 
@@ -162,7 +193,7 @@ decoder出现了几次？
 .venv\Scripts\python.exe scripts\eval.py --case-set financial-sample
 ```
 
-## 7. 常见问题
+## 8. 常见问题
 
 ### 页面打不开
 

@@ -13,6 +13,14 @@
 
 ## 启动可交互 Demo
 
+跨平台通用方式：
+
+```bash
+python -m streamlit run app.py
+```
+
+Windows 虚拟环境示例：
+
 ```bash
 .venv\Scripts\python.exe -m streamlit run app.py
 ```
@@ -42,9 +50,19 @@ http://localhost:8501
 | 业务逻辑设计 | Provider 架构、结构化切块、表格原子块、来源约束 |
 | 产品迭代 | 评估集、回归测试、A/B 测试设计、用户反馈指标 |
 
-面向扫描版 PDF 的最小可运行智能文档问答 Agent 原型。
+面向扫描版 PDF 和真实业务样本文档的最小可运行智能文档问答 Agent 原型。
 
-本项目用于技术笔试作业：围绕实际附件 `agent开发作业样本.pdf`（中信证券财务报表片段）完成文档类型判断、OCR/文本解析、结构化切分、检索问答、来源引用和答案自检。
+本项目以真实业务 PDF 样本为作品集场景：围绕财报、合同、标准、合规材料等高价值文档，完成文档类型判断、OCR/文本解析、结构化切分、检索问答、来源引用和答案自检。仓库中的财报样本用于回归评估和可复现实验，不作为唯一业务场景。
+
+## 3 分钟面试演示脚本
+
+1. 打开 Streamlit Demo，说明这是 AI Native 文档问答 Agent MVP，CLI 用于评估，前端用于交互原型展示。
+2. 上传 PDF，点击 `Detect PDF`，展示页数、文本层/扫描页判断和推荐解析策略。
+3. 点击 `Parse & Build Index`，展示 `page_count`、`chunk_count`、`table_count`、`parser` 和 `strategy`。
+4. 输入一个可回答问题，展示 `Answer`，再展开 `Sources` 说明页码、chunk_id 和 snippet 如何支撑答案。
+5. 展示 `self_check`，强调 `grounded=false` 或 `risk_flags` 非空会触发 warning。
+6. 输入一个文档外问题，展示拒答或风险提示，说明系统不会在无证据时强行编造。
+7. 最后切到 README/AGENT_WORKFLOW/PRODUCT_ITERATION，说明 Agent 协作开发、评估闭环和产品迭代指标。
 
 ## 已实现能力
 
