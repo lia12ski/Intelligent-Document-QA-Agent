@@ -59,7 +59,9 @@ def analyze_query(
     normalized_question = _apply_ocr_replacements(question, config.ocr_replacements)
     rewritten = rewrite_query(normalized_question, config)
 
-    if _is_table_query(normalized_question, config.table_terms):
+    if _is_count_query(normalized_question):
+        intent = "count"
+    elif _is_table_query(normalized_question, config.table_terms):
         intent = "table"
     elif _is_numeric_query(normalized_question, config.numeric_terms):
         intent = "numeric"
@@ -102,6 +104,16 @@ def _is_numeric_query(question: str, numeric_terms: tuple[str, ...]) -> bool:
 
 def _is_definition_query(question: str, definition_terms: tuple[str, ...]) -> bool:
     return any(word in question for word in definition_terms)
+
+
+def _is_count_query(question: str) -> bool:
+    return bool(
+        re.search(
+            r"(出现|提到|被提到|命中|包含).{0,8}(几次|多少次|几遍|多少遍|几处|多少处)",
+            question,
+        )
+        or re.search(r"(几次|多少次|几遍|多少遍|几处|多少处).{0,8}(出现|提到|被提到|命中|包含)", question)
+    )
 
 
 def _apply_ocr_replacements(

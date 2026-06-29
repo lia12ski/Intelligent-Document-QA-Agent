@@ -1,5 +1,47 @@
 # Intelligent Document QA Agent
 
+## AI Native MVP 展示
+
+本项目不仅是一个 RAG 问答脚本，而是一个面向真实业务文档的 AI Native MVP。它通过 AI 编程工具辅助完成架构设计、模块实现、测试补全和发布前检查，同时由人工负责架构约束、代码审查、业务边界和可靠性评估。
+
+当前项目支持两种使用方式：
+
+1. CLI：适合开发、测试和自动化评估。
+2. Streamlit Demo：适合面试展示和产品原型验证。
+
+完整启动和演示步骤见 [USAGE.md](USAGE.md)。
+
+## 启动可交互 Demo
+
+```bash
+.venv\Scripts\python.exe -m streamlit run app.py
+```
+
+浏览器打开：
+
+```text
+http://localhost:8501
+```
+
+功能包括：
+
+- 上传 PDF
+- 文档类型检测
+- 一键解析
+- 文档问答
+- 来源引用
+- self-check 展示
+
+## 与 AI Native 岗位能力的对应关系
+
+| 岗位能力 | 项目体现 |
+| --- | --- |
+| AI 工具链使用 | Claude Code / Codex 辅助开发、测试、审查和文档维护 |
+| Agent 编排思维 | Query Analyzer、检索决策、查询改写、拒答路径、自检模块 |
+| 快速 MVP 构建 | CLI + Streamlit Demo 打通上传、解析、问答、引用、自检 |
+| 业务逻辑设计 | Provider 架构、结构化切块、表格原子块、来源约束 |
+| 产品迭代 | 评估集、回归测试、A/B 测试设计、用户反馈指标 |
+
 面向扫描版 PDF 的最小可运行智能文档问答 Agent 原型。
 
 本项目用于技术笔试作业：围绕实际附件 `agent开发作业样本.pdf`（中信证券财务报表片段）完成文档类型判断、OCR/文本解析、结构化切分、检索问答、来源引用和答案自检。
@@ -26,6 +68,10 @@
 ├── DESIGN.md
 ├── TESTING.md
 ├── AI_USAGE.md
+├── USAGE.md
+├── AGENT_WORKFLOW.md
+├── PRODUCT_ITERATION.md
+├── app.py
 ├── requirements.txt
 ├── .env.example
 ├── data/
@@ -76,7 +122,7 @@ MINERU_API_KEY=your_key_here
 MINERU_MODEL_VERSION=vlm
 ```
 
-默认 `PARSER_PROVIDER=local` 可离线运行基础流程；配置 MinerU 后，扫描 PDF 会走 MinerU 官方 API，并把结果统一转换为本项目的 `pages.json`、`chunks.json` 和 `tables.json`。
+默认 `PARSER_PROVIDER=local` 可离线运行基础流程；配置 MinerU 后，扫描 PDF 会走 MinerU 官方 API，并把结果统一转换为本项目的 `pages.json`、`chunks.json` 和 `tables.json`。Streamlit Demo 检测到 `MINERU_API_KEY` 后会默认选择 MinerU，便于演示扫描 PDF 和复杂版面解析；没有 key 时仍保持本地离线解析。
 
 ## 领域配置
 

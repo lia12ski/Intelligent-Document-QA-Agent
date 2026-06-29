@@ -205,3 +205,43 @@ def test_deterministic_table_value_runs_before_conservative_llm() -> None:
 
     assert answer.generation_provider == "extractive_deterministic"
     assert "9,786,701,432.33" in answer.answer
+
+
+def test_agent_counts_term_occurrences_across_all_chunks() -> None:
+    chunks = [
+        DocumentChunk(
+            chunk_id="page_1_paragraph_1",
+            text="The decoder receives inputs. A decoder layer uses attention.",
+            page=1,
+            chunk_type="paragraph",
+            source_file="sample.pdf",
+        ),
+        DocumentChunk(
+            chunk_id="page_2_paragraph_1",
+            text="The encoder is different from the Decoder.",
+            page=2,
+            chunk_type="paragraph",
+            source_file="sample.pdf",
+        ),
+        DocumentChunk(
+            chunk_id="page_3_paragraph_1",
+            text="This page mentions attention only.",
+            page=3,
+            chunk_type="paragraph",
+            source_file="sample.pdf",
+        ),
+    ]
+
+    answer = QaAgent(
+        Bm25Retriever(chunks),
+        min_score=0.01,
+        all_chunks=chunks,
+    ).answer("decoder出现了几次？")
+
+    assert answer.generation_provider == "deterministic_count"
+    assert answer.query_analysis["intent"] == "count"
+    assert "共出现 3 次" in answer.answer
+    assert [source["chunk_id"] for source in answer.sources] == [
+        "page_1_paragraph_1",
+        "page_2_paragraph_1",
+    ]

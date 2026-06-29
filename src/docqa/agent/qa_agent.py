@@ -7,6 +7,7 @@ from docqa.agent.prompt_builder import build_grounding_prompt
 from docqa.agent.query_analyzer import QueryAnalysis, QueryAnalyzerConfig, analyze_query
 from docqa.agent.self_check import self_check
 from docqa.llm.client import LlmClient
+from docqa.parsing.schema import DocumentChunk
 from docqa.retrieval.bm25 import RetrievalResult
 from docqa.retrieval.hybrid import Retriever
 
@@ -65,6 +66,7 @@ class QaAgent:
         focus_terms: tuple[str, ...] = DEFAULT_FOCUS_TERMS,
         query_config: QueryAnalyzerConfig | None = None,
         dense_min_score: float = 0.4,
+        all_chunks: list[DocumentChunk] | None = None,
     ) -> None:
         self._retriever = retriever
         self._min_score = min_score
@@ -73,9 +75,14 @@ class QaAgent:
         self._focus_terms = focus_terms
         self._query_config = query_config or QueryAnalyzerConfig()
         self._dense_min_score = dense_min_score
+        self._all_chunks = list(all_chunks or [])
 
     def answer(self, question: str, top_k: int = 5) -> QaAnswer:
         analysis = analyze_query(question, self._query_config)
+        count_answer = self._answer_count_query(question, analysis, top_k)
+        if count_answer is not None:
+            return count_answer
+
         search_query = analysis.rewritten_query or question
         results = self._retriever.search(search_query, top_k=top_k)
         attempts = [{"query": search_query, "result_count": len(results)}]
@@ -182,6 +189,56 @@ class QaAgent:
                 )
         return _extractive_answer(question, analysis, results, focus_terms), "extractive", None
 
+    def _answer_count_query(
+        self,
+        question: str,
+        analysis: QueryAnalysis,
+        top_k: int,
+    ) -> QaAnswer | None:
+        if analysis.intent != "count" or not self._all_chunks:
+            return None
+
+        target = _extract_count_target(analysis.rewritten_query or question)
+        if not target:
+            return None
+
+        matches = _count_term_occurrences(self._all_chunks, target)
+        total = sum(count for _, count in matches)
+        source_results = [
+            RetrievalResult(chunk=chunk, score=float(count), source="deterministic_count")
+            for chunk, count in matches[:top_k]
+        ]
+        if total:
+            locations = "；".join(
+                f"第{chunk.page}页/{chunk.chunk_id}（{count}次）"
+                for chunk, count in matches[:top_k]
+            )
+            answer_text = f"“{target}”在已解析文本中共出现 {total} 次。命中位置：{locations}。"
+            risk_flags: list[str] = []
+        else:
+            answer_text = f"在已解析文本中没有找到“{target}”。"
+            risk_flags = ["term not found in parsed chunks"]
+
+        return QaAnswer(
+            question=question,
+            answer=answer_text,
+            sources=[_source_from_result(result) for result in source_results],
+            self_check={
+                "grounded": True,
+                "confidence": "medium",
+                "risk_flags": risk_flags,
+            },
+            query_analysis=analysis.to_dict(),
+            retrieval_attempts=[
+                {
+                    "query": target,
+                    "result_count": len(matches),
+                    "tool": "deterministic_count",
+                }
+            ],
+            generation_provider="deterministic_count",
+        )
+
 
 def _source_from_result(result: RetrievalResult) -> dict[str, object]:
     chunk = result.chunk
@@ -197,6 +254,51 @@ def _source_from_result(result: RetrievalResult) -> dict[str, object]:
         "dense_score": result.dense_score,
         "snippet": _compact(chunk.text, max_length=220),
     }
+
+
+def _extract_count_target(question: str) -> str | None:
+    patterns = (
+        r"(.+?)(?:出现|提到|被提到|命中|包含)(?:了)?(?:几次|多少次|几遍|多少遍|几处|多少处)",
+        r"(?:几次|多少次|几遍|多少遍|几处|多少处).{0,8}(?:出现|提到|被提到|命中|包含).{0,4}(.+)",
+    )
+    for pattern in patterns:
+        match = re.search(pattern, question, flags=re.IGNORECASE)
+        if not match:
+            continue
+        target = _clean_count_target(match.group(1))
+        if target:
+            return target
+    return None
+
+
+def _clean_count_target(target: str) -> str:
+    target = re.sub(
+        r"^(请问|帮我看下|帮我统计|统计|文档中|全文中|本文中|这份文档中|这个文档中|在文档中|在全文中|在本文中)+",
+        "",
+        target.strip(),
+    )
+    target = re.sub(r"(这个词|这个术语|这个短语|该词|该术语|该短语)$", "", target)
+    return target.strip(" \t\r\n？?。；;，,：:\"'“”‘’（）()[]【】")
+
+
+def _count_term_occurrences(
+    chunks: list[DocumentChunk],
+    target: str,
+) -> list[tuple[DocumentChunk, int]]:
+    pattern = _term_occurrence_pattern(target)
+    matches: list[tuple[DocumentChunk, int]] = []
+    for chunk in chunks:
+        count = len(pattern.findall(chunk.text))
+        if count:
+            matches.append((chunk, count))
+    return matches
+
+
+def _term_occurrence_pattern(target: str) -> re.Pattern[str]:
+    escaped = re.escape(target)
+    if re.fullmatch(r"[A-Za-z0-9_.+-]+", target):
+        return re.compile(rf"(?<![A-Za-z0-9_]){escaped}(?![A-Za-z0-9_])", re.IGNORECASE)
+    return re.compile(escaped, re.IGNORECASE)
 
 
 def _extractive_answer(

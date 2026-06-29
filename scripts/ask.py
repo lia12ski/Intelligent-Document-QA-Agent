@@ -64,6 +64,7 @@ def main() -> None:
             generic_amount_expansion=settings.generic_amount_expansion,
         ),
         dense_min_score=settings.dense_min_score,
+        all_chunks=chunks,
     )
     answer = agent.answer(args.question, top_k=args.top_k)
     print(json.dumps(answer.to_dict(), ensure_ascii=False, indent=2))

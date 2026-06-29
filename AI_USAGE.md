@@ -52,3 +52,16 @@
 - 本轮 Codex 执行并确认：`pytest` 55 项通过、`compileall` 通过、`scripts/validate_index.py` 通过、`scripts/eval.py --case-set financial-sample` 6/6 通过，并完成一次 `scripts/ask.py` 问答烟测。
 - 本轮 Codex 发现并处理的提交前问题包括：将 `.idea/` 加入 `.gitignore`，删除误生成的 `1.8.0` 文件，确认 `.env`、缓存目录、原始数据和处理产物不会被误提交。
 - Codex 输出仍需人工最终确认，尤其是是否公开提交样本 PDF、运行截图，以及绑定哪个 GitHub 远程仓库。
+
+## AI Native Workflow 补充
+
+为了贴近真实 AI Native 开发流程，本项目将 AI 工具使用方式进一步显式化：
+
+- 使用 Product Agent 思维拆解 MVP 范围。
+- 使用 Architect Agent 思维约束模块边界和数据契约。
+- 使用 Coding Agent 辅助实现 Streamlit Demo 和功能胶水代码。
+- 使用 Test Agent 检查现有 pytest 和 eval 是否受影响。
+- 使用 Reviewer Agent 检查是否存在硬编码答案、未处理异常和敏感信息提交风险。
+- 使用 Ops Agent 检查 README、依赖、`.env.example` 和运行说明是否一致。
+
+所有 AI 生成内容仍需人工审查，不能直接视为可信结果；不接受无法解释的代码，也不能绕过来源引用和 self_check 直接展示最终答案。

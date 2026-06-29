@@ -22,6 +22,12 @@ def test_rewrite_query_expands_generic_amount_question() -> None:
     assert rewrite_query("金额是多少？") == "金额 合计 账面价值 金融负债"
 
 
+def test_analyze_count_query() -> None:
+    analysis = analyze_query("decoder出现了几次？")
+
+    assert analysis.intent == "count"
+
+
 def test_query_analyzer_can_use_domain_config() -> None:
     config = QueryAnalyzerConfig(
         table_terms=("合同金额",),
